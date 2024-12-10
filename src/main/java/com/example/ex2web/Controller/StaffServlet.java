@@ -144,8 +144,8 @@ public class StaffServlet extends HttpServlet {
     private void listStaff(HttpServletRequest req, HttpServletResponse resp) {
         List<Staff> staffs = this.employeeService.findAllStaff();
         req.setAttribute("staffs", staffs);
-
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("staff/list.jsp");
+        System.out.println(staffs.size());
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/staff/list.jsp");
 
         try {
             dispatcher.forward(req, resp);
