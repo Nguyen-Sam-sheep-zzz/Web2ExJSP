@@ -32,8 +32,48 @@ public class StaffServlet extends HttpServlet {
             case "delete":
                 deleteStaff(req, resp);
                 break;
+            case "update":
+                updateStaff(req, resp);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void updateStaff(HttpServletRequest req, HttpServletResponse resp) {
+        String name = req.getParameter("name");
+        int age = Integer.parseInt(req.getParameter("age"));
+        String position = req.getParameter("position");
+        String department = req.getParameter("department");
+        double salary = Double.parseDouble(req.getParameter("salary"));
+        int id = Integer.parseInt(req.getParameter("id"));
+
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+
+            staff.setName(name);
+            staff.setAge(age);
+            staff.setPosition(position);
+            staff.setDepartment(department);
+            staff.setSalary(salary);
+            staff.setId(id);
+
+            this.employeeService.updateStaff(id, staff);
+            req.setAttribute("staff", staff);
+            dispatcher = req.getRequestDispatcher("staff/update.jsp");
+
+            try {
+                dispatcher.forward(req, resp);
+            } catch (ServletException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -89,7 +129,32 @@ public class StaffServlet extends HttpServlet {
             case "delete":
                 showDeleteForm(req, resp);
                 break;
+            case "update":
+                showUpdateForm(req, resp);
+                break;
         }
+    }
+
+    private void showUpdateForm(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            req.setAttribute("staff", staff);
+            dispatcher = req.getRequestDispatcher("staff/update.jsp");
+        }
+
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void showDeleteForm(HttpServletRequest req, HttpServletResponse resp) {
