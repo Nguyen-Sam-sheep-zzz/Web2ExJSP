@@ -29,8 +29,28 @@ public class StaffServlet extends HttpServlet {
             case "add":
                 addStaff(req, resp);
                 break;
+            case "delete":
+                deleteStaff(req, resp);
+                break;
             default:
                 break;
+        }
+    }
+
+    private void deleteStaff(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            this.employeeService.deleteStaff(id);
+            try {
+                resp.sendRedirect("/staffs");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -66,6 +86,21 @@ public class StaffServlet extends HttpServlet {
             case "add":
                 showAddForm(req, resp);
                 break;
+            case "delete":
+                showDeleteForm(req, resp);
+                break;
+        }
+    }
+
+    private void showDeleteForm(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            req.setAttribute("staff", staff);
+            dispatcher = req.getRequestDispatcher("staff/delete.jsp");
         }
     }
 
