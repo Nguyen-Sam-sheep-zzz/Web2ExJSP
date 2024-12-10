@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 
 @WebServlet(name = "StaffServlet", value = "/staffs")
@@ -132,6 +133,47 @@ public class StaffServlet extends HttpServlet {
             case "update":
                 showUpdateForm(req, resp);
                 break;
+            case "view":
+                viewStaff(req, resp);
+                break;
+            default:
+                listStaff(req, resp);
+                break;
+        }
+    }
+    private void listStaff(HttpServletRequest req, HttpServletResponse resp) {
+        List<Staff> staffs = this.employeeService.findAllStaff();
+        req.setAttribute("staffs", staffs);
+
+        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("staff/list.jsp");
+
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void viewStaff(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("error-404.jsp");
+        } else {
+            req.setAttribute("staff", staff);
+            dispatcher = req.getRequestDispatcher("staff/view.jsp");
+        }
+
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
