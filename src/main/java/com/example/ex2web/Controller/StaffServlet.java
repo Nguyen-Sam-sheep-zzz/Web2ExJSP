@@ -13,14 +13,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
-
 @WebServlet(name = "StaffServlet", value = "/staffs")
-
 public class StaffServlet extends HttpServlet {
     private final EmployeeService employeeService = new EmployeeServiceImpl();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
+        req.setCharacterEncoding("UTF-8");
+        resp.setContentType("text/html; charset=UTF-8");
+        resp.setCharacterEncoding("UTF-8");
+
         String action = req.getParameter("action");
 
         if (action == null) {
@@ -41,6 +44,23 @@ public class StaffServlet extends HttpServlet {
         }
     }
 
+    private void deleteStaff(HttpServletRequest req, HttpServletResponse resp) {
+        int id = Integer.parseInt(req.getParameter("id"));
+        Staff staff = this.employeeService.findStaffById(id);
+        RequestDispatcher dispatcher;
+
+        if (staff == null) {
+            dispatcher = req.getRequestDispatcher("/staff/error-404.jsp");
+        } else {
+            this.employeeService.deleteStaff(id);
+            try {
+                resp.sendRedirect("/staffs");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private void updateStaff(HttpServletRequest req, HttpServletResponse resp) {
         String name = req.getParameter("name");
         int age = Integer.parseInt(req.getParameter("age"));
@@ -50,10 +70,11 @@ public class StaffServlet extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
 
         Staff staff = this.employeeService.findStaffById(id);
+        System.out.println(staff);
         RequestDispatcher dispatcher;
 
         if (staff == null) {
-            dispatcher = req.getRequestDispatcher("error-404.jsp");
+            dispatcher = req.getRequestDispatcher("/staff/error-404.jsp");
         } else {
 
             staff.setName(name);
@@ -65,6 +86,7 @@ public class StaffServlet extends HttpServlet {
 
             this.employeeService.updateStaff(id, staff);
             req.setAttribute("staff", staff);
+            req.setAttribute("message", "Staff information was updated");
             dispatcher = req.getRequestDispatcher("staff/update.jsp");
 
             try {
@@ -78,23 +100,6 @@ public class StaffServlet extends HttpServlet {
         }
     }
 
-    private void deleteStaff(HttpServletRequest req, HttpServletResponse resp) {
-        int id = Integer.parseInt(req.getParameter("id"));
-        Staff staff = this.employeeService.findStaffById(id);
-        RequestDispatcher dispatcher;
-
-        if (staff == null) {
-            dispatcher = req.getRequestDispatcher("error-404.jsp");
-        } else {
-            this.employeeService.deleteStaff(id);
-            try {
-                resp.sendRedirect("/staffs");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     private void addStaff(HttpServletRequest req, HttpServletResponse resp) {
         String name = req.getParameter("name");
         int age = Integer.parseInt(req.getParameter("age"));
@@ -105,8 +110,8 @@ public class StaffServlet extends HttpServlet {
 
         Staff staff = new Staff(id, name, age, position, department, salary);
         this.employeeService.addStaff(staff);
-        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("staff/add.jsp");
-        req.setAttribute("message", "New customer was added successfully");
+        RequestDispatcher dispatcher = req.getRequestDispatcher("/staff/add.jsp");
+        req.setAttribute("message", "New staff was added successfully");
 
         try {
             dispatcher.forward(req, resp);
@@ -120,6 +125,7 @@ public class StaffServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
+
         if (action == null) {
             action = "";
         }
@@ -127,11 +133,11 @@ public class StaffServlet extends HttpServlet {
             case "add":
                 showAddForm(req, resp);
                 break;
-            case "delete":
-                showDeleteForm(req, resp);
-                break;
             case "update":
                 showUpdateForm(req, resp);
+                break;
+            case "delete":
+                showDeleteForm(req, resp);
                 break;
             case "view":
                 viewStaff(req, resp);
@@ -141,10 +147,10 @@ public class StaffServlet extends HttpServlet {
                 break;
         }
     }
+
     private void listStaff(HttpServletRequest req, HttpServletResponse resp) {
         List<Staff> staffs = this.employeeService.findAllStaff();
         req.setAttribute("staffs", staffs);
-        System.out.println(staffs.size());
         RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/staff/list.jsp");
 
         try {
@@ -162,7 +168,7 @@ public class StaffServlet extends HttpServlet {
         RequestDispatcher dispatcher;
 
         if (staff == null) {
-            dispatcher = req.getRequestDispatcher("error-404.jsp");
+            dispatcher = req.getRequestDispatcher("staff/error-404.jsp");
         } else {
             req.setAttribute("staff", staff);
             dispatcher = req.getRequestDispatcher("staff/view.jsp");
@@ -183,7 +189,7 @@ public class StaffServlet extends HttpServlet {
         RequestDispatcher dispatcher;
 
         if (staff == null) {
-            dispatcher = req.getRequestDispatcher("error-404.jsp");
+            dispatcher = req.getRequestDispatcher("staff/error-404.jsp");
         } else {
             req.setAttribute("staff", staff);
             dispatcher = req.getRequestDispatcher("staff/update.jsp");
@@ -203,11 +209,19 @@ public class StaffServlet extends HttpServlet {
         int id = Integer.parseInt(req.getParameter("id"));
         Staff staff = this.employeeService.findStaffById(id);
         RequestDispatcher dispatcher;
+
         if (staff == null) {
-            dispatcher = req.getRequestDispatcher("error-404.jsp");
+            dispatcher = req.getRequestDispatcher("staff/error-404.jsp");
         } else {
             req.setAttribute("staff", staff);
             dispatcher = req.getRequestDispatcher("staff/delete.jsp");
+        }
+        try {
+            dispatcher.forward(req, resp);
+        } catch (ServletException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
